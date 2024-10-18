@@ -1,42 +1,44 @@
 import { UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
-import Image from "next/image";
+import { Bell, MessageCircle, Search } from "lucide-react";
 
-const Navbar = async () => {
+import { Input } from "@/components/ui/input";
+
+export default async function Navbar() {
   const user = await currentUser();
-  return (
-    <div className="flex items-center justify-between p-4">
-      {/* SEARCH BAR */}
-      <div className="hidden md:flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-300 px-2">
-        <Image src="/search.png" alt="" width={14} height={14} />
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-[200px] p-2 bg-transparent outline-none"
-        />
-      </div>
-      {/* ICONS AND USER */}
-      <div className="flex items-center gap-6 justify-end w-full">
-        <div className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer">
-          <Image src="/message.png" alt="" width={20} height={20} />
-        </div>
-        <div className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative">
-          <Image src="/announcement.png" alt="" width={20} height={20} />
-          <div className="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-purple-500 text-white rounded-full text-xs">
-            1
-          </div>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs leading-3 font-medium">John Doe</span>
-          <span className="text-[10px] text-gray-500 text-right">
-            {user?.publicMetadata?.role as string}
-          </span>
-        </div>
-        {/* <Image src="/avatar.png" alt="" width={36} height={36} className="rounded-full"/> */}
-        <UserButton />
-      </div>
-    </div>
-  );
-};
 
-export default Navbar;
+  return (
+    <nav className="flex items-center justify-between p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex-1 md:flex-initial">
+        <form className="hidden md:flex items-center space-x-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="pl-8 w-[200px] md:w-[300px] bg-background"
+            />
+          </div>
+        </form>
+      </div>
+      <div className="flex items-center space-x-4">
+        <button className="relative p-2 text-muted-foreground hover:text-foreground" aria-label="Messages">
+          <MessageCircle className="h-5 w-5" />
+        </button>
+        <button className="relative p-2 text-muted-foreground hover:text-foreground" aria-label="Notifications">
+          <Bell className="h-5 w-5" />
+          <span className="absolute top-0 right-0 h-4 w-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+            1
+          </span>
+        </button>
+        <div className="flex items-center space-x-4">
+          <div className="hidden sm:flex flex-col items-end">
+            <span className="text-sm font-medium">{user?.publicMetadata?.username as string}</span>
+            <span className="text-xs text-muted-foreground">{user?.publicMetadata?.role as string}</span>
+          </div>
+          <UserButton afterSignOutUrl="/" />
+        </div>
+      </div>
+    </nav>
+  );
+}

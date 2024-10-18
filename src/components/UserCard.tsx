@@ -1,32 +1,43 @@
-import prisma from "@/lib/prisma";
-import Image from "next/image";
+import { MoreHorizontal } from "lucide-react"
+import Image from "next/image"
 
-const UserCard = async ({
-  type,
-}: {
-  type: "admin" | "teacher" | "student" | "parent";
-}) => {
-  const modelMap: Record<typeof type, any> = {
-    admin: prisma.admin,
-    teacher: prisma.teacher,
-    student: prisma.student,
-    parent: prisma.parent,
-  };
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import prisma from "@/lib/prisma"
 
-  const data = await modelMap[type].count();
+type UserType = "admin" | "teacher" | "student" | "parent"
+
+interface UserCardProps {
+  type: UserType
+}
+
+const modelMap: Record<UserType, any> = {
+  admin: prisma.admin,
+  teacher: prisma.teacher,
+  student: prisma.student,
+  parent: prisma.parent,
+}
+
+export default async function UserCard({ type }: UserCardProps) {
+  const data = await modelMap[type].count()
 
   return (
-    <div className="rounded-2xl odd:bg-lamaPurple even:bg-lamaYellow p-4 flex-1 min-w-[130px]">
-      <div className="flex justify-between items-center">
-        <span className="text-[10px] bg-white px-2 py-1 rounded-full text-green-600">
+    <Card className={`flex-1 min-w-[130px] ${type === "admin" || type === "student" ? "bg-primary" : "bg-secondary"}`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">
+          {type.charAt(0).toUpperCase() + type.slice(1)}s
+        </CardTitle>
+        <Button variant="ghost" size="icon" aria-label="More options">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{data}</div>
+        <Badge variant="outline" className="mt-2">
           2024/25
-        </span>
-        <Image src="/more.png" alt="" width={20} height={20} />
-      </div>
-      <h1 className="text-2xl font-semibold my-4">{data}</h1>
-      <h2 className="capitalize text-sm font-medium text-gray-500">{type}s</h2>
-    </div>
-  );
-};
-
-export default UserCard;
+        </Badge>
+      </CardContent>
+    </Card>
+  )
+}

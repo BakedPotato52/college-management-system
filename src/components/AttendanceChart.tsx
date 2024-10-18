@@ -1,56 +1,70 @@
-"use client";
-import Image from "next/image";
-import {
-  BarChart,
-  Bar,
-  Rectangle,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+"use client"
 
-const AttendanceChart = ({
-  data,
-}: {
-  data: { name: string; present: number; absent: number }[];
-}) => {
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+
+import { Card } from "@/components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+
+interface AttendanceData {
+  name: string
+  present: number
+  absent: number
+}
+
+interface AttendanceChartProps {
+  data: AttendanceData[]
+}
+
+export default function AttendanceChart({ data }: AttendanceChartProps) {
   return (
-    <ResponsiveContainer width="100%" height="90%">
-      <BarChart width={500} height={300} data={data} barSize={20}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ddd" />
-        <XAxis
-          dataKey="name"
-          axisLine={false}
-          tick={{ fill: "#d1d5db" }}
-          tickLine={false}
-        />
-        <YAxis axisLine={false} tick={{ fill: "#d1d5db" }} tickLine={false} />
-        <Tooltip
-          contentStyle={{ borderRadius: "10px", borderColor: "lightgray" }}
-        />
-        <Legend
-          align="left"
-          verticalAlign="top"
-          wrapperStyle={{ paddingTop: "20px", paddingBottom: "40px" }}
-        />
-        <Bar
-          dataKey="present"
-          fill="#FAE27C"
-          legendType="circle"
-          radius={[10, 10, 0, 0]}
-        />
-        <Bar
-          dataKey="absent"
-          fill="#C3EBFA"
-          legendType="circle"
-          radius={[10, 10, 0, 0]}
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-};
-
-export default AttendanceChart;
+    <Card className="w-full h-[400px]">
+      <ChartContainer
+        config={{
+          present: {
+            label: "Present",
+            color: "hsl(var(--warning))",
+          },
+          absent: {
+            label: "Absent",
+            color: "hsl(var(--sky))",
+          },
+        }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tick={{ fill: "hsl(var(--muted-foreground))" }}
+              tickLine={false}
+            />
+            <YAxis
+              axisLine={false}
+              tick={{ fill: "hsl(var(--muted-foreground))" }}
+              tickLine={false}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Legend
+              align="left"
+              verticalAlign="top"
+              wrapperStyle={{ paddingTop: "20px", paddingBottom: "40px" }}
+            />
+            <Bar
+              dataKey="present"
+              fill="hsl(var(--warning))"
+              radius={[4, 4, 0, 0]}
+              barSize={20}
+            />
+            <Bar
+              dataKey="absent"
+              fill="hsl(var(--sky))"
+              radius={[4, 4, 0, 0]}
+              barSize={20}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </Card>
+  )
+}

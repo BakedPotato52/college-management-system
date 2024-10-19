@@ -2,7 +2,19 @@ import { currentUser } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
 
-const menuItems = [
+type MenuItem = {
+  icon: string;
+  label: string;
+  href: string;
+  visible: Array<"admin" | "teacher" | "student" | "parent">;
+};
+
+type MenuSection = {
+  title: string;
+  items: MenuItem[];
+};
+
+const menuItems: MenuSection[] = [
   {
     title: "MENU",
     items: [
@@ -22,12 +34,6 @@ const menuItems = [
         icon: "/student.png",
         label: "Students",
         href: "/list/students",
-        visible: ["admin", "teacher"],
-      },
-      {
-        icon: "/parent.png",
-        label: "Parents",
-        href: "/list/parents",
         visible: ["admin", "teacher"],
       },
       {
@@ -117,34 +123,41 @@ const menuItems = [
   },
 ];
 
-const Menu = async () => {
+export default async function Menu() {
   const user = await currentUser();
-  const role = user?.publicMetadata.role as string;
+  const role = user?.publicMetadata.role as "admin" | "teacher" | "student" | "parent";
+
   return (
-    <div className="mt-4 text-sm">
-      {menuItems.map((i) => (
-        <div className="flex flex-col gap-2" key={i.title}>
-          <span className="hidden lg:block text-gray-400 font-light my-4">
-            {i.title}
-          </span>
-          {i.items.map((item) => {
-            if (item.visible.includes(role)) {
-              return (
-                <Link
-                  href={item.href}
-                  key={item.label}
-                  className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
-                >
-                  <Image src={item.icon} alt="" width={20} height={20} />
-                  <span className="hidden lg:block">{item.label}</span>
-                </Link>
-              );
-            }
-          })}
+    <nav className="mt-4 text-sm text-black" aria-label="Main Navigation">
+      {menuItems.map((section) => (
+        <div key={section.title} className="mb-6">
+          <h2 className="sr-only lg:not-sr-only text-gray-400 font-light mb-2">
+            {section.title}
+          </h2>
+          <ul className="flex flex-col gap-1">
+            {section.items
+              .filter((item) => item.visible.includes(role))
+              .map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 px-3 rounded-md hover:bg-lamaSkyLight transition-colors duration-200"
+                    aria-label={item.label}
+                  >
+                    <Image
+                      src={item.icon}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="flex-shrink-0"
+                    />
+                    <span className="hidden lg:inline">{item.label}</span>
+                  </Link>
+                </li>
+              ))}
+          </ul>
         </div>
       ))}
-    </div>
+    </nav>
   );
-};
-
-export default Menu;
+}

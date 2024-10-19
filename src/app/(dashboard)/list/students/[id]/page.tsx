@@ -21,14 +21,14 @@ const SingleStudentPage = async ({
 
   const student:
     | (Student & {
-        class: Class & { _count: { lessons: number } };
-      })
+      class: Class & { _count: { lessons: number } };
+    })
     | null = await prisma.student.findUnique({
-    where: { id },
-    include: {
-      class: { include: { _count: { select: { lessons: true } } } },
-    },
-  });
+      where: { id },
+      include: {
+        class: { include: { _count: { select: { lessons: true } } } },
+      },
+    });
 
   if (!student) {
     return notFound();

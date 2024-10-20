@@ -122,13 +122,7 @@ const TeacherForm = ({
           register={register}
           error={errors.address}
         />
-        <InputField
-          label="Blood Type"
-          name="bloodType"
-          defaultValue={data?.bloodType}
-          register={register}
-          error={errors.bloodType}
-        />
+
         <InputField
           label="Birthday"
           name="birthday"

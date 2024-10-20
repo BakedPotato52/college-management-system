@@ -14,15 +14,15 @@ model Admin {
 }
 
 model Student {
-  id          String       @id
-  username    String       @unique
-  name        String
-  surname     String
-  email       String?      @unique
-  phone       String?      @unique
-  address     String
-  img         String?
-  bloodType   String
+  id       String  @id
+  username String  @unique
+  name     String
+  surname  String
+  email    String? @unique
+  phone    String? @unique
+  address  String
+  img      String?
+
   sex         UserSex
   createdAt   DateTime     @default(now())
   parentId    String
@@ -45,7 +45,6 @@ model Teacher {
   phone     String?   @unique
   address   String
   img       String?
-  bloodType String
   sex       UserSex
   createdAt DateTime  @default(now())
   subjects  Subject[]

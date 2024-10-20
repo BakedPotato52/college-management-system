@@ -147,7 +147,7 @@ export const createTeacher = async (
       password: data.password,
       firstName: data.name,
       lastName: data.surname,
-      publicMetadata:{role:"teacher"}
+      publicMetadata: { role: "teacher" }
     });
 
     await prisma.teacher.create({
@@ -160,7 +160,7 @@ export const createTeacher = async (
         phone: data.phone || null,
         address: data.address,
         img: data.img || null,
-        bloodType: data.bloodType,
+
         sex: data.sex,
         birthday: data.birthday,
         subjects: {
@@ -207,7 +207,7 @@ export const updateTeacher = async (
         phone: data.phone || null,
         address: data.address,
         img: data.img || null,
-        bloodType: data.bloodType,
+
         sex: data.sex,
         birthday: data.birthday,
         subjects: {
@@ -267,7 +267,7 @@ export const createStudent = async (
       password: data.password,
       firstName: data.name,
       lastName: data.surname,
-      publicMetadata:{role:"student"}
+      publicMetadata: { role: "student" }
     });
 
     await prisma.student.create({
@@ -280,7 +280,7 @@ export const createStudent = async (
         phone: data.phone || null,
         address: data.address,
         img: data.img || null,
-        bloodType: data.bloodType,
+
         sex: data.sex,
         birthday: data.birthday,
         gradeId: data.gradeId,
@@ -325,7 +325,7 @@ export const updateStudent = async (
         phone: data.phone || null,
         address: data.address,
         img: data.img || null,
-        bloodType: data.bloodType,
+
         sex: data.sex,
         birthday: data.birthday,
         gradeId: data.gradeId,

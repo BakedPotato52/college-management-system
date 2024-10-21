@@ -33,7 +33,7 @@ export default async function Navbar() {
         </button>
         <div className="flex items-center space-x-4">
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-sm font-medium">{user?.publicMetadata?.username as string}</span>
+            <span className="text-sm font-medium">{user?.publicMetadata?.name as string}</span>
             <span className="text-xs text-muted-foreground">{user?.publicMetadata?.role as string}</span>
           </div>
           <UserButton afterSignOutUrl="/" />

@@ -9,6 +9,8 @@ interface AttendanceData {
   name: string
   present: number
   absent: number
+  presentColor: string
+  absentColor: string
 }
 
 export default async function AttendanceChartContainer() {
@@ -50,6 +52,8 @@ export default async function AttendanceChartContainer() {
       name: day,
       present: attendanceMap[day].present,
       absent: attendanceMap[day].absent,
+      presentColor: "hsl(217, 91%, 60%)", // Tailwind blue-500
+      absentColor: "hsl(0, 84%, 60%)", // Tailwind red-500
     }))
 
     return (

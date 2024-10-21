@@ -4,7 +4,6 @@ import AttendanceChartContainer from "@/components/AttendanceChartContainer"
 import CountChartContainer from "@/components/CountChartContainer"
 import EventCalendarContainer from "@/components/EventCalendarContainer"
 import UserCard from "@/components/UserCard"
-import { Card } from "@/components/ui/card"
 
 interface AdminDashboardProps {
     searchParams: { [key: string]: string | undefined }
@@ -24,38 +23,33 @@ export default function AdminDashboard({ searchParams }: AdminDashboardProps) {
             <div className="grid gap-6 lg:grid-cols-3">
                 <section aria-label="Charts and Statistics" className="lg:col-span-2 space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
-                        <Card className="p-4">
-                            <h2 className="text-lg font-semibold mb-4">User Count</h2>
-                            <div className="h-[400px]">
-                                <Suspense fallback={<div className="animate-pulse bg-gray-200 h-full rounded-md"></div>}>
-                                    <CountChartContainer />
-                                </Suspense>
-                            </div>
-                        </Card>
-                        <Card className="p-4">
-                            <h2 className="text-lg font-semibold mb-4">Attendance Overview</h2>
-                            <div className="h-[400px]">
-                                <Suspense fallback={<div className="animate-pulse bg-gray-200 h-full rounded-md"></div>}>
-                                    <AttendanceChartContainer />
-                                </Suspense>
-                            </div>
-                        </Card>
+
+                        <div className="h-[480px] flex justify-center items-center mt-6">
+                            <Suspense fallback={<div className="animate-pulse bg-gray-200 h-full rounded-md"></div>}>
+                                <CountChartContainer />
+                            </Suspense>
+                        </div>
+
+                        <div className="h-[480px]">
+                            <Suspense fallback={<div className="animate-pulse bg-gray-200 h-full rounded-md"></div>}>
+                                <AttendanceChartContainer />
+                            </Suspense>
+                        </div>
+
                     </div>
                 </section>
 
                 <aside aria-label="Events and Announcements" className="space-y-6">
-                    <Card className="p-4">
-                        <h2 className="text-lg font-semibold mb-4">Upcoming Events</h2>
-                        <Suspense fallback={<div className="animate-pulse bg-gray-200 h-[300px] rounded-md"></div>}>
-                            <EventCalendarContainer searchParams={searchParams} />
-                        </Suspense>
-                    </Card>
-                    <Card className="p-4">
-                        <h2 className="text-lg font-semibold mb-4">Recent Announcements</h2>
-                        <Suspense fallback={<div className="animate-pulse bg-gray-200 h-[200px] rounded-md"></div>}>
-                            <Announcements />
-                        </Suspense>
-                    </Card>
+
+                    <Suspense fallback={<div className="animate-pulse bg-gray-200 h-[300px] rounded-md"></div>}>
+                        <EventCalendarContainer searchParams={searchParams} />
+                    </Suspense>
+
+
+                    <Suspense fallback={<div className="animate-pulse bg-gray-200 h-[200px] rounded-md"></div>}>
+                        <Announcements />
+                    </Suspense>
+
                 </aside>
             </div>
         </div>

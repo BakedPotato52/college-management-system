@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import BigCalendar from "./BigCalender";
-import { adjustScheduleToCurrentWeek } from "@/lib/utils";
+import { adjustScheduleToCurrentWeek } from "@/lib/util";
 
 const BigCalendarContainer = async ({
   type,

@@ -40,7 +40,7 @@ export default async function CountChartContainer() {
         <div className="flex justify-center gap-8 mt-4">
           {[
             { label: "Boys", count: boys, color: "bg-sky-400" },
-            { label: "Girls", count: girls, color: "bg-yellow-400" },
+            { label: "Girls", count: girls, color: "bg-pink-400" },
           ].map(({ label, count, color }) => (
             <div key={label} className="flex flex-col items-center gap-1">
               <div className={`w-5 h-5 ${color} rounded-full`} />

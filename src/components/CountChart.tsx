@@ -22,12 +22,12 @@ export default function CountChart({ boys, girls }: CountChartProps) {
     {
       name: "Girls",
       count: girls,
-      fill: "hsl(var(--warning))",
+      fill: "hsl(340 82% 65%)", // Equivalent to bg-pink-400
     },
     {
       name: "Boys",
       count: boys,
-      fill: "hsl(var(--sky))",
+      fill: "hsl(199 89% 60%)", // Equivalent to bg-sky-400
     },
   ]
 
@@ -64,7 +64,7 @@ export default function CountChart({ boys, girls }: CountChartProps) {
           </ResponsiveContainer>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <Users className="w-8 h-8 mx-auto mb-2" />
+              <Users className="w-8 h-8 mx-auto text-primary mb-2" />
               <p className="text-2xl font-bold">{total}</p>
               <p className="text-sm text-muted-foreground">Total Students</p>
             </div>

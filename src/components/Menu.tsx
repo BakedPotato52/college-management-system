@@ -9,7 +9,7 @@ import menuItems from "./menuItems"
 import Image from "next/image"
 
 interface MenuProps {
-  role: "admin" | "teacher" | "student" | "parent"
+  role: "admin" | "teacher" | "student"
 }
 
 export default function Menu({ role }: MenuProps) {
@@ -39,7 +39,7 @@ export default function Menu({ role }: MenuProps) {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="sm:hidden mt-4 text-sm text-black" aria-label="Main Navigation">
+      <nav className="max-sm:hidden mt-4 text-sm text-black" aria-label="Main Navigation">
         <Link
           href="/"
           className="flex items-center justify-center lg:justify-start gap-2 mb-8"
@@ -84,7 +84,7 @@ export default function Menu({ role }: MenuProps) {
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="More options" className="w-full h-full">
-                  <MoreHorizontal className="w-6 h-6" />
+                  <MoreHorizontal />
                   <span className="text-xs mt-1">More</span>
                 </Button>
               </SheetTrigger>

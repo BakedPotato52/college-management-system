@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useFormState } from "react-dom";
 import { toast } from "react-toastify";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import dynamic from "next/dynamic";
 
 import {
@@ -25,19 +25,44 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+// Define a type for valid table names
+type TableName = 'teacher' | 'student' | 'subject' | 'class' | 'exam';
+
 export interface FormContainerProps {
-  table: string;
+  table: TableName;
   type: "create" | "update" | "delete";
   data?: any;
   id?: string | number;
 }
 
-const deleteActionMap = {
-  subject: deleteSubject,
-  class: deleteClass,
-  teacher: deleteTeacher,
-  student: deleteStudent,
-  exam: deleteExam,
+// Define a type for the state returned by handleDelete
+interface DeleteState {
+  success: boolean;
+  error: boolean;
+}
+
+// Update the type of deleteActionMap
+const deleteActionMap: Record<TableName, (formData: FormData) => Promise<DeleteState>> = {
+  subject: async (formData) => {
+    await deleteSubject(formData);
+    return { success: true, error: false };
+  },
+  class: async (formData) => {
+    await deleteClass(formData);
+    return { success: true, error: false };
+  },
+  teacher: async (formData) => {
+    await deleteTeacher(formData);
+    return { success: true, error: false };
+  },
+  student: async (formData) => {
+    await deleteStudent(formData);
+    return { success: true, error: false };
+  },
+  exam: async (formData) => {
+    await deleteExam(formData);
+    return { success: true, error: false };
+  },
 };
 
 const formComponents = {
@@ -58,9 +83,14 @@ const FormModal = ({
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const FormComponent = formComponents[table];
+  const FormComponent = formComponents[table] as React.ComponentType<{
+    type: "create" | "update";
+    data?: any;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    relatedData?: any;
+  }>;
 
-  const handleDelete = async (formData: FormData) => {
+  const handleDelete = async (prevState: DeleteState, formData: FormData): Promise<DeleteState> => {
     const deleteAction = deleteActionMap[table];
     if (!deleteAction) {
       toast.error(`Delete action not found for ${table}`);
@@ -68,11 +98,13 @@ const FormModal = ({
     }
 
     try {
-      await deleteAction(formData);
-      toast.success(`${table} has been deleted!`);
-      setOpen(false);
-      router.refresh();
-      return { success: true, error: false };
+      const result = await deleteAction(formData);
+      if (result.success) {
+        toast.success(`${table} has been deleted!`);
+        setOpen(false);
+        router.refresh();
+      }
+      return result;
     } catch (error) {
       toast.error(`Failed to delete ${table}`);
       return { success: false, error: true };

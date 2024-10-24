@@ -1,25 +1,25 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// async function clearDatabase() {
-//   // Delete records in reverse order of dependencies
-//   await prisma.attendance.deleteMany();
-//   await prisma.result.deleteMany();
-//   await prisma.assignment.deleteMany();
-//   await prisma.exam.deleteMany();
-//   await prisma.event.deleteMany();
-//   await prisma.announcement.deleteMany();
-//   await prisma.student.deleteMany();
-//   await prisma.parent.deleteMany();
-//   await prisma.teacher.deleteMany();
-//   await prisma.lesson.deleteMany();
-//   await prisma.class.deleteMany();
-//   await prisma.subject.deleteMany();
-//   await prisma.grade.deleteMany();
-//   await prisma.admin.deleteMany();
+async function clearDatabase() {
+  // Delete records in reverse order of dependencies
+  await prisma.attendance.deleteMany();
+  await prisma.result.deleteMany();
+  await prisma.assignment.deleteMany();
+  await prisma.exam.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.announcement.deleteMany();
+  await prisma.student.deleteMany();
+  await prisma.parent.deleteMany();
+  await prisma.teacher.deleteMany();
+  await prisma.lesson.deleteMany();
+  await prisma.class.deleteMany();
+  await prisma.subject.deleteMany();
+  // await prisma.grade.deleteMany();
+  await prisma.admin.deleteMany();
 
-//   console.log("Database cleared.");
-// }
+  console.log("Database cleared.");
+}
 
 enum Day {
   MONDAY = "MONDAY",
@@ -35,20 +35,16 @@ enum UserSex {
 }
 
 async function main() {
-  // clearDatabase()
+  clearDatabase()
   // ADMIN
-  await prisma.admin.create({
-    data: {
-      id: "admin1",
-      username: "admin1",
-    },
-  });
-  await prisma.admin.create({
-    data: {
-      id: "admin2",
-      username: "admin2",
-    },
-  });
+  for (let i = 1; i <= 2; i++) {
+    await prisma.admin.create({
+      data: {
+        id: `admin${i}`,
+        username: `admin${i}`,
+      },
+    });
+  }
 
   // GRADE
   for (let i = 1; i <= 6; i++) {
@@ -72,16 +68,16 @@ async function main() {
 
   // SUBJECT
   const subjectData = [
-    { name: "Mathematics" },
-    { name: "Science" },
-    { name: "English" },
-    { name: "History" },
-    { name: "Geography" },
-    { name: "Physics" },
-    { name: "Chemistry" },
-    { name: "Biology" },
+    { name: "Operating System" },
+    { name: "Blockchain Technologies" },
+    { name: "Cryptogrphy" },
+    { name: "Theme Project" },
+    { name: "Machine Learning" },
+    { name: "Software Enginering" },
+    { name: "Principle of Compiler Design" },
+    { name: "Database Management System" },
     { name: "Computer Science" },
-    { name: "Art" },
+    { name: "Artifitial Inteligence" },
   ];
 
   for (const subject of subjectData) {

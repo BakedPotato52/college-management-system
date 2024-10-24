@@ -15,7 +15,7 @@ async function clearDatabase() {
   await prisma.lesson.deleteMany();
   await prisma.class.deleteMany();
   await prisma.subject.deleteMany();
-  // await prisma.grade.deleteMany();
+  await prisma.grade.deleteMany();
   await prisma.admin.deleteMany();
 
   console.log("Database cleared.");

@@ -1,25 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-async function clearDatabase() {
-  // Delete records in reverse order of dependencies
-  await prisma.attendance.deleteMany();
-  await prisma.result.deleteMany();
-  await prisma.assignment.deleteMany();
-  await prisma.exam.deleteMany();
-  await prisma.event.deleteMany();
-  await prisma.announcement.deleteMany();
-  await prisma.student.deleteMany();
-  await prisma.parent.deleteMany();
-  await prisma.teacher.deleteMany();
-  await prisma.lesson.deleteMany();
-  await prisma.class.deleteMany();
-  await prisma.subject.deleteMany();
-  await prisma.grade.deleteMany();
-  await prisma.admin.deleteMany();
 
-  console.log("Database cleared.");
-}
 
 enum Day {
   MONDAY = "MONDAY",
@@ -35,7 +17,6 @@ enum UserSex {
 }
 
 async function main() {
-  clearDatabase()
   // ADMIN
   for (let i = 1; i <= 2; i++) {
     await prisma.admin.create({
@@ -84,44 +65,7 @@ async function main() {
     await prisma.subject.create({ data: subject });
   }
 
-  // TEACHER
-  for (let i = 1; i <= 15; i++) {
-    await prisma.teacher.create({
-      data: {
-        id: `teacher${i}`, // Unique ID for the teacher
-        username: `teacher${i}`,
-        name: `TName${i}`,
-        surname: `TSurname${i}`,
-        email: `teacher${i}@example.com`,
-        phone: `123-456-789${i}`,
-        address: `Address${i}`,
-        bloodType: "A+",
-        sex: i % 2 === 0 ? UserSex.MALE : UserSex.FEMALE,
-        subjects: { connect: [{ id: (i % 10) + 1 }] },
-        classes: { connect: [{ id: (i % 6) + 1 }] },
-        birthday: new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
-      },
-    });
-  }
 
-  // LESSON
-  for (let i = 1; i <= 30; i++) {
-    await prisma.lesson.create({
-      data: {
-        name: `Lesson${i}`,
-        day: Day[
-          Object.keys(Day)[
-          Math.floor(Math.random() * Object.keys(Day).length)
-          ] as keyof typeof Day
-        ],
-        startTime: new Date(new Date().setHours(new Date().getHours() + 1)),
-        endTime: new Date(new Date().setHours(new Date().getHours() + 3)),
-        subjectId: (i % 10) + 1,
-        classId: (i % 6) + 1,
-        teacherId: `teacher${(i % 15) + 1}`,
-      },
-    });
-  }
 
   // PARENT
   for (let i = 1; i <= 25; i++) {
@@ -158,19 +102,6 @@ async function main() {
       },
     });
   }
-
-  // EXAM
-  for (let i = 1; i <= 10; i++) {
-    await prisma.exam.create({
-      data: {
-        title: `Exam ${i}`,
-        startTime: new Date(new Date().setHours(new Date().getHours() + 1)),
-        endTime: new Date(new Date().setHours(new Date().getHours() + 2)),
-        lessonId: (i % 30) + 1,
-      },
-    });
-  }
-
   // ASSIGNMENT
   for (let i = 1; i <= 10; i++) {
     await prisma.assignment.create({
@@ -230,6 +161,58 @@ async function main() {
       },
     });
   }
+
+  // EXAM
+  for (let i = 1; i <= 10; i++) {
+    await prisma.exam.create({
+      data: {
+        title: `Exam ${i}`,
+        startTime: new Date(new Date().setHours(new Date().getHours() + 1)),
+        endTime: new Date(new Date().setHours(new Date().getHours() + 2)),
+        lessonId: (i % 30) + 1,
+      },
+    });
+  }
+
+  // TEACHER
+  for (let i = 1; i <= 15; i++) {
+    await prisma.teacher.create({
+      data: {
+        id: `teacher${i}`, // Unique ID for the teacher
+        username: `teacher${i}`,
+        name: `TName${i}`,
+        surname: `TSurname${i}`,
+        email: `teacher${i}@example.com`,
+        phone: `123-456-789${i}`,
+        address: `Address${i}`,
+        bloodType: "A+",
+        sex: i % 2 === 0 ? UserSex.MALE : UserSex.FEMALE,
+        subjects: { connect: [{ id: (i % 10) + 1 }] },
+        classes: { connect: [{ id: (i % 6) + 1 }] },
+        birthday: new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
+      },
+    });
+  }
+
+  // LESSON
+  for (let i = 1; i <= 30; i++) {
+    await prisma.lesson.create({
+      data: {
+        name: `Lesson${i}`,
+        day: Day[
+          Object.keys(Day)[
+          Math.floor(Math.random() * Object.keys(Day).length)
+          ] as keyof typeof Day
+        ],
+        startTime: new Date(new Date().setHours(new Date().getHours() + 1)),
+        endTime: new Date(new Date().setHours(new Date().getHours() + 3)),
+        subjectId: (i % 10) + 1,
+        classId: (i % 6) + 1,
+        teacherId: `teacher${(i % 15) + 1}`,
+      },
+    });
+  }
+
 
   console.log("Seeding completed successfully.");
 }

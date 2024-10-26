@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 
 // Define a type for valid table names
-type TableName = 'teacher' | 'student' | 'subject' | 'class' | 'exam';
+type TableName = 'teacher' | 'student' | 'subject' | 'class' | 'exam' | 'assignment';
 
 export interface FormContainerProps {
   table: TableName;

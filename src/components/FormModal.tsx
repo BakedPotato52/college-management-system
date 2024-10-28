@@ -1,76 +1,104 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useFormState } from "react-dom";
-import { toast } from "react-toastify";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import dynamic from "next/dynamic";
-
 import {
   deleteClass,
   deleteExam,
   deleteStudent,
   deleteSubject,
-  deleteTeacher
+  deleteTeacher,
 } from "@/lib/actions";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useFormState } from "react-dom";
+import { toast } from "react-toastify";
+import { FormContainerProps } from "./FormContainer";
+import { X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-// Define a type for valid table names
-type TableName = 'teacher' | 'student' | 'subject' | 'class' | 'exam' | 'assignment';
-
-export interface FormContainerProps {
-  table: TableName;
-  type: "create" | "update" | "delete";
-  data?: any;
-  id?: string | number;
-}
-
-// Define a type for the state returned by handleDelete
-interface DeleteState {
-  success: boolean;
-  error: boolean;
-}
-
-// Update the type of deleteActionMap
-const deleteActionMap: Record<TableName, (formData: FormData) => Promise<DeleteState>> = {
-  subject: async (formData) => {
-    await deleteSubject(formData);
-    return { success: true, error: false };
-  },
-  class: async (formData) => {
-    await deleteClass(formData);
-    return { success: true, error: false };
-  },
-  teacher: async (formData) => {
-    await deleteTeacher(formData);
-    return { success: true, error: false };
-  },
-  student: async (formData) => {
-    await deleteStudent(formData);
-    return { success: true, error: false };
-  },
-  exam: async (formData) => {
-    await deleteExam(formData);
-    return { success: true, error: false };
-  },
+const deleteActionMap = {
+  subject: deleteSubject,
+  class: deleteClass,
+  teacher: deleteTeacher,
+  student: deleteStudent,
+  exam: deleteExam,
+  // TODO: OTHER DELETE ACTIONS
+  parent: deleteSubject,
+  lesson: deleteSubject,
+  assignment: deleteSubject,
+  result: deleteSubject,
+  attendance: deleteSubject,
+  event: deleteSubject,
+  announcement: deleteSubject,
 };
 
-const formComponents = {
-  teacher: dynamic(() => import("./forms/TeacherForm"), { ssr: false }),
-  student: dynamic(() => import("./forms/StudentForm"), { ssr: false }),
-  subject: dynamic(() => import("./forms/SubjectForm"), { ssr: false }),
-  class: dynamic(() => import("./forms/ClassForm"), { ssr: false }),
-  exam: dynamic(() => import("./forms/ExamForm"), { ssr: false }),
+// Lazy load forms with enhanced loading spinner
+const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
+  loading: () => <div className="spinner" />,
+});
+const StudentForm = dynamic(() => import("./forms/StudentForm"), {
+  loading: () => <div className="spinner" />,
+});
+const SubjectForm = dynamic(() => import("./forms/SubjectForm"), {
+  loading: () => <div className="spinner" />,
+});
+const ClassForm = dynamic(() => import("./forms/ClassForm"), {
+  loading: () => <div className="spinner" />,
+});
+const ExamForm = dynamic(() => import("./forms/ExamForm"), {
+  loading: () => <div className="spinner" />,
+});
+// TODO: OTHER FORMS
+
+const forms: {
+  [key: string]: (
+    setOpen: Dispatch<SetStateAction<boolean>>,
+    type: "create" | "update",
+    data?: any,
+    relatedData?: any
+  ) => JSX.Element;
+} = {
+  subject: (setOpen, type, data, relatedData) => (
+    <SubjectForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  class: (setOpen, type, data, relatedData) => (
+    <ClassForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  teacher: (setOpen, type, data, relatedData) => (
+    <TeacherForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  student: (setOpen, type, data, relatedData) => (
+    <StudentForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  exam: (setOpen, type, data, relatedData) => (
+    <ExamForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+    // TODO OTHER LIST ITEMS
+  ),
 };
 
 const FormModal = ({
@@ -80,101 +108,68 @@ const FormModal = ({
   id,
   relatedData,
 }: FormContainerProps & { relatedData?: any }) => {
+  const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
+  const bgColor =
+    type === "create"
+      ? "bg-lamaYellow"
+      : type === "update"
+        ? "bg-lamaSky"
+        : "bg-lamaPurple";
+
   const [open, setOpen] = useState(false);
-  const router = useRouter();
 
-  const FormComponent = formComponents[table] as React.ComponentType<{
-    type: "create" | "update";
-    data?: any;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    relatedData?: any;
-  }>;
+  const Form = () => {
+    const [state, formAction] = useFormState(deleteActionMap[table], {
+      success: false,
+      error: false,
+    });
 
-  const handleDelete = async (prevState: DeleteState, formData: FormData): Promise<DeleteState> => {
-    const deleteAction = deleteActionMap[table];
-    if (!deleteAction) {
-      toast.error(`Delete action not found for ${table}`);
-      return { success: false, error: true };
-    }
+    const router = useRouter();
 
-    try {
-      const result = await deleteAction(formData);
-      if (result.success) {
-        toast.success(`${table} has been deleted!`);
+    useEffect(() => {
+      if (state.success) {
+        toast(`${table} has been deleted!`);
         setOpen(false);
         router.refresh();
       }
-      return result;
-    } catch (error) {
-      toast.error(`Failed to delete ${table}`);
-      return { success: false, error: true };
-    }
+    }, [state, router]);
+
+    return type === "delete" && id ? (
+      <form action={formAction} className="p-4 flex flex-col gap-4">
+        <input type="text | number" name="id" value={id} hidden />
+        <span className="text-center font-medium">
+          All data will be lost. Are you sure you want to delete this {table}?
+        </span>
+        <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center hover:bg-red-800 transition">
+          Delete
+        </button>
+      </form>
+    ) : type === "create" || type === "update" ? (
+      forms[table](setOpen, type, data, relatedData)
+    ) : (
+      "Form not found!"
+    );
   };
-
-  const [state, formAction] = useFormState(handleDelete, {
-    success: false,
-    error: false,
-  });
-
-  useEffect(() => {
-    if (state.error) {
-      toast.error(`An error occurred while deleting the ${table}`);
-    }
-  }, [state, table]);
-
-  const renderIcon = () => {
-    switch (type) {
-      case "create":
-        return <Plus className="w-4 h-4" />;
-      case "update":
-        return <Pencil className="w-4 h-4" />;
-      case "delete":
-        return <Trash2 className="w-4 h-4" />;
-    }
-  };
-
-  const buttonColor = type === "create" ? "bg-yellow-400" : type === "update" ? "bg-sky-400" : "bg-purple-400";
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          className={`${buttonColor} p-2 rounded-full`}
-          onClick={() => setOpen(true)}
-          aria-label={`${type} ${table}`}
-        >
-          {renderIcon()}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{type === "delete" ? `Delete ${table}` : `${type === "create" ? "Create" : "Update"} ${table}`}</DialogTitle>
-          <DialogDescription>
-            {type === "delete" ? "This action cannot be undone." : `Enter the details to ${type} the ${table}.`}
-          </DialogDescription>
-        </DialogHeader>
-        {type === "delete" && id ? (
-          <form action={formAction} className="space-y-4">
-            <input type="hidden" name="id" value={id} />
-            <p className="text-center font-medium">
-              Are you sure you want to delete this {table}? All related data will be lost.
-            </p>
-            <Button type="submit" variant="destructive" className="w-full">
-              Delete
-            </Button>
-          </form>
-        ) : (type === "create" || type === "update") && FormComponent ? (
-          <FormComponent
-            type={type}
-            data={data}
-            setOpen={setOpen}
-            relatedData={relatedData}
-          />
-        ) : (
-          <p>Form not found!</p>
-        )}
-      </DialogContent>
-    </Dialog>
+    <>
+      <button
+        className={`${size} flex items-center justify-center rounded-full ${bgColor} hover:shadow-md transition-shadow duration-150`}
+        onClick={() => setOpen(true)}
+      >
+        <Image src={`/${type}.png`} alt="" width={16} height={16} />
+      </button>
+      {open && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center transition-opacity duration-300">
+          <div className="bg-white p-6 rounded-lg shadow-lg relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%] transition-transform transform scale-95">
+            <Form />
+            <div className="absolute top-4 right-4 cursor-pointer text-gray-500 hover:text-gray-700 transition" onClick={() => setOpen(false)}>
+              <X />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

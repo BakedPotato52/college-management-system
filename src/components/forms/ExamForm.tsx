@@ -1,45 +1,46 @@
-"use client";
+'use client'
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import InputField from "../InputField";
-import {
-  examSchema,
-  ExamSchema,
-  subjectSchema,
-  SubjectSchema,
-} from "@/lib/formValidationSchemas";
-import {
-  createExam,
-  createSubject,
-  updateExam,
-  updateSubject,
-} from "@/lib/actions";
-import { useFormState } from "react-dom";
-import { Dispatch, SetStateAction, useEffect } from "react";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { useFormState } from "react-dom"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "react-toastify"
+import { examSchema, ExamSchema } from "@/lib/formValidationSchemas"
+import { createExam, updateExam } from "@/lib/actions"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-const ExamForm = ({
-  type,
-  data,
-  setOpen,
-  relatedData,
-}: {
-  type: "create" | "update";
-  data?: any;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  relatedData?: any;
-}) => {
+type Lesson = {
+  id: number
+  name: string
+}
+
+type ExamFormProps = {
+  type: 'create' | 'update'
+  data?: Partial<ExamSchema>
+  setOpen: (open: boolean) => void
+  relatedData: {
+    lessons: Lesson[]
+  }
+}
+
+export default function ExamForm({ type, data, setOpen, relatedData }: ExamFormProps = {
+  type: 'create',
+  setOpen: () => { },
+  relatedData: { lessons: [] }
+}) {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ExamSchema>({
     resolver: zodResolver(examSchema),
-  });
-
-  // AFTER REACT 19 IT'LL BE USEACTIONSTATE
+    defaultValues: data,
+  })
 
   const [state, formAction] = useFormState(
     type === "create" ? createExam : updateExam,
@@ -47,93 +48,83 @@ const ExamForm = ({
       success: false,
       error: false,
     }
-  );
+  )
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
-    formAction(data);
-  });
-
-  const router = useRouter();
+  const router = useRouter()
 
   useEffect(() => {
     if (state.success) {
-      toast(`Exam has been ${type === "create" ? "created" : "updated"}!`);
-      setOpen(false);
-      router.refresh();
+      toast(`Exam has been ${type === "create" ? "created" : "updated"}!`)
+      setOpen(false)
+      router.refresh()
     }
-  }, [state, router, type, setOpen]);
+  }, [state, router, type, setOpen])
 
-  const { lessons } = relatedData;
+  const onSubmit = handleSubmit((formData) => {
+    formAction(formData)
+  })
 
   return (
-    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
-      <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new exam" : "Update the exam"}
-      </h1>
-
-      <div className="flex justify-between flex-wrap gap-4">
-        <InputField
-          label="Exam title"
-          name="title"
-          defaultValue={data?.title}
-          register={register}
-          error={errors?.title}
-        />
-        <InputField
-          label="Start Date"
-          name="startTime"
-          defaultValue={data?.startTime}
-          register={register}
-          error={errors?.startTime}
-          type="datetime-local"
-        />
-        <InputField
-          label="End Date"
-          name="endTime"
-          defaultValue={data?.endTime}
-          register={register}
-          error={errors?.endTime}
-          type="datetime-local"
-        />
-        {data && (
-          <InputField
-            label="Id"
-            name="id"
-            defaultValue={data?.id}
-            register={register}
-            error={errors?.id}
-            hidden
-          />
-        )}
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Lesson</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("lessonId")}
-            defaultValue={data?.teachers}
-          >
-            {lessons.map((lesson: { id: number; name: string }) => (
-              <option value={lesson.id} key={lesson.id}>
-                {lesson.name}
-              </option>
-            ))}
-          </select>
-          {errors.lessonId?.message && (
-            <p className="text-xs text-red-400">
-              {errors.lessonId.message.toString()}
-            </p>
+    <Card>
+      <form onSubmit={onSubmit}>
+        <CardHeader>
+          <CardTitle>{type === "create" ? "Create a new exam" : "Update the exam"}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Exam title</Label>
+            <Input id="title" {...register("title")} defaultValue={data?.title} />
+            {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startTime">Start Date</Label>
+              <Input
+                id="startTime"
+                type="datetime-local"
+                {...register("startTime")}
+                defaultValue={data?.startTime ? new Date(data.startTime).toISOString().slice(0, 16) : undefined}
+              />
+              {errors.startTime && <p className="text-sm text-red-500">{errors.startTime.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endTime">End Date</Label>
+              <Input
+                id="endTime"
+                type="datetime-local"
+                {...register("endTime")}
+                defaultValue={data?.endTime ? new Date(data.endTime).toISOString().slice(0, 16) : undefined}
+              />
+              {errors.endTime && <p className="text-sm text-red-500">{errors.endTime.message}</p>}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lesson">Lesson</Label>
+            <Select defaultValue={data?.lessonId?.toString()} {...register("lessonId")}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a lesson" />
+              </SelectTrigger>
+              <SelectContent>
+                {relatedData.lessons.map((lesson) => (
+                  <SelectItem key={lesson.id} value={lesson.id.toString()}>
+                    {lesson.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.lessonId && <p className="text-sm text-red-500">{errors.lessonId.message}</p>}
+          </div>
+          {data && (
+            <Input type="hidden" {...register("id")} defaultValue={data.id} />
           )}
-        </div>
-      </div>
-      {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
-      )}
-      <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
-      </button>
-    </form>
-  );
-};
-
-export default ExamForm;
+        </CardContent>
+        <CardFooter>
+          {state.error && <p className="text-sm text-red-500">Something went wrong!</p>}
+          <Button type="submit" className="ml-auto">
+            {type === "create" ? "Create" : "Update"}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  )
+}

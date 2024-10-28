@@ -1,47 +1,58 @@
-"use client";
+'use client'
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import InputField from "../InputField";
-import Image from "next/image";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import {
-  studentSchema,
-  StudentSchema,
-  teacherSchema,
-  TeacherSchema,
-} from "@/lib/formValidationSchemas";
-import { useFormState } from "react-dom";
-import {
-  createStudent,
-  createTeacher,
-  updateStudent,
-  updateTeacher,
-} from "@/lib/actions";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import { CldUploadWidget } from "next-cloudinary";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { useFormState } from "react-dom"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "react-toastify"
+import Image from "next/image"
+import { CldUploadWidget } from "next-cloudinary"
+import { studentSchema, StudentSchema } from "@/lib/formValidationSchemas"
+import { createStudent, updateStudent } from "@/lib/actions"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-const StudentForm = ({
-  type,
-  data,
-  setOpen,
-  relatedData,
-}: {
-  type: "create" | "update";
-  data?: any;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  relatedData?: any;
-}) => {
+type Grade = {
+  id: number
+  level: number
+}
+
+type Class = {
+  id: number
+  name: string
+  capacity: number
+  _count: { students: number }
+}
+
+type StudentFormProps = {
+  type: 'create' | 'update'
+  data?: Partial<StudentSchema>
+  setOpen: (open: boolean) => void
+  relatedData: {
+    grades: Grade[]
+    classes: Class[]
+  }
+}
+
+export default function StudentForm({ type, data, setOpen, relatedData }: StudentFormProps = {
+  type: 'create',
+  setOpen: () => { },
+  relatedData: { grades: [], classes: [] }
+}) {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<StudentSchema>({
     resolver: zodResolver(studentSchema),
-  });
+    defaultValues: data,
+  })
 
-  const [img, setImg] = useState<any>();
+  const [img, setImg] = useState<{ secure_url: string } | null>(null)
 
   const [state, formAction] = useFormState(
     type === "create" ? createStudent : updateStudent,
@@ -49,207 +60,154 @@ const StudentForm = ({
       success: false,
       error: false,
     }
-  );
+  )
 
-  const onSubmit = handleSubmit((data) => {
-    console.log("hello");
-    console.log(data);
-    formAction({ ...data, img: img?.secure_url });
-  });
-
-  const router = useRouter();
+  const router = useRouter()
 
   useEffect(() => {
     if (state.success) {
-      toast(`Student has been ${type === "create" ? "created" : "updated"}!`);
-      setOpen(false);
-      router.refresh();
+      toast(`Student has been ${type === "create" ? "created" : "updated"}!`)
+      setOpen(false)
+      router.refresh()
     }
-  }, [state, router, type, setOpen]);
+  }, [state, router, type, setOpen])
 
-  const { grades, classes } = relatedData;
+  const onSubmit = handleSubmit((formData) => {
+    formAction({ ...formData, img: img?.secure_url })
+  })
 
   return (
-    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
-      <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new student" : "Update the student"}
-      </h1>
-      <span className="text-xs text-gray-400 font-medium">
-        Authentication Information
-      </span>
-      <div className="flex justify-between flex-wrap gap-4">
-        <InputField
-          label="Username"
-          name="username"
-          defaultValue={data?.username}
-          register={register}
-          error={errors?.username}
-        />
-        <InputField
-          label="Email"
-          name="email"
-          defaultValue={data?.email}
-          register={register}
-          error={errors?.email}
-        />
-        <InputField
-          label="Password"
-          name="password"
-          type="password"
-          defaultValue={data?.password}
-          register={register}
-          error={errors?.password}
-        />
-      </div>
-      <span className="text-xs text-gray-400 font-medium">
-        Personal Information
-      </span>
-      <CldUploadWidget
-        uploadPreset="school"
-        onSuccess={(result, { widget }) => {
-          setImg(result.info);
-          widget.close();
-        }}
-      >
-        {({ open }) => {
-          return (
-            <div
-              className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-              onClick={() => open()}
-            >
-              <Image src="/upload.png" alt="" width={28} height={28} />
-              <span>Upload a photo</span>
+    <Card>
+      <form onSubmit={onSubmit}>
+        <CardHeader>
+          <CardTitle>{type === "create" ? "Create a new student" : "Update the student"}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <h2 className="text-sm font-semibold">Authentication Information</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input id="username" {...register("username")} />
+                {errors.username && <p className="text-sm text-red-500">{errors.username.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" {...register("email")} />
+                {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" {...register("password")} />
+                {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+              </div>
             </div>
-          );
-        }}
-      </CldUploadWidget>
-      <div className="flex justify-between flex-wrap gap-4">
-        <InputField
-          label="First Name"
-          name="name"
-          defaultValue={data?.name}
-          register={register}
-          error={errors.name}
-        />
-        <InputField
-          label="Last Name"
-          name="surname"
-          defaultValue={data?.surname}
-          register={register}
-          error={errors.surname}
-        />
-        <InputField
-          label="Phone"
-          name="phone"
-          defaultValue={data?.phone}
-          register={register}
-          error={errors.phone}
-        />
-        <InputField
-          label="Address"
-          name="address"
-          defaultValue={data?.address}
-          register={register}
-          error={errors.address}
-        />
+          </div>
 
-        <InputField
-          label="Birthday"
-          name="birthday"
-          defaultValue={data?.birthday.toISOString().split("T")[0]}
-          register={register}
-          error={errors.birthday}
-          type="date"
-        />
-        <InputField
-          label="Parent Id"
-          name="parentId"
-          defaultValue={data?.parentId}
-          register={register}
-          error={errors.parentId}
-        />
-        {data && (
-          <InputField
-            label="Id"
-            name="id"
-            defaultValue={data?.id}
-            register={register}
-            error={errors?.id}
-            hidden
-          />
-        )}
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Sex</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("sex")}
-            defaultValue={data?.sex}
-          >
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
-          </select>
-          {errors.sex?.message && (
-            <p className="text-xs text-red-400">
-              {errors.sex.message.toString()}
-            </p>
+          <div className="space-y-4">
+            <h2 className="text-sm font-semibold">Personal Information</h2>
+            <CldUploadWidget
+              uploadPreset="school"
+              onSuccess={(result: any) => {
+                setImg(result.info)
+              }}
+            >
+              {({ open }) => (
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => open()}>
+                  <Image src="/upload.png" alt="" width={28} height={28} />
+                  <span className="text-sm text-gray-500">Upload a photo</span>
+                </div>
+              )}
+            </CldUploadWidget>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">First Name</Label>
+                <Input id="name" {...register("name")} />
+                {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="surname">Last Name</Label>
+                <Input id="surname" {...register("surname")} />
+                {errors.surname && <p className="text-sm text-red-500">{errors.surname.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input id="phone" {...register("phone")} />
+                {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input id="address" {...register("address")} />
+                {errors.address && <p className="text-sm text-red-500">{errors.address.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="birthday">Birthday</Label>
+                <Input id="birthday" type="date" {...register("birthday")} />
+                {errors.birthday && <p className="text-sm text-red-500">{errors.birthday.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="parentId">Parent ID</Label>
+                <Input id="parentId" {...register("parentId")} />
+                {errors.parentId && <p className="text-sm text-red-500">{errors.parentId.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sex">Sex</Label>
+                <Select defaultValue={data?.sex} {...register("sex")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sex" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MALE">Male</SelectItem>
+                    <SelectItem value="FEMALE">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.sex && <p className="text-sm text-red-500">{errors.sex.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="grade">Grade</Label>
+                <Select defaultValue={data?.gradeId?.toString()} {...register("gradeId")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {relatedData.grades.map((grade) => (
+                      <SelectItem key={grade.id} value={grade.id.toString()}>
+                        {grade.level}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.gradeId && <p className="text-sm text-red-500">{errors.gradeId.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="class">Class</Label>
+                <Select defaultValue={data?.classId?.toString()} {...register("classId")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select class" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {relatedData.classes.map((classItem) => (
+                      <SelectItem key={classItem.id} value={classItem.id.toString()}>
+                        {classItem.name} - {classItem._count.students}/{classItem.capacity} Capacity
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.classId && <p className="text-sm text-red-500">{errors.classId.message}</p>}
+              </div>
+            </div>
+          </div>
+          {data && (
+            <Input type="hidden" {...register("id")} defaultValue={data.id} />
           )}
-        </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Grade</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("gradeId")}
-            defaultValue={data?.gradeId}
-          >
-            {grades.map((grade: { id: number; level: number }) => (
-              <option value={grade.id} key={grade.id}>
-                {grade.level}
-              </option>
-            ))}
-          </select>
-          {errors.gradeId?.message && (
-            <p className="text-xs text-red-400">
-              {errors.gradeId.message.toString()}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Class</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("classId")}
-            defaultValue={data?.classId}
-          >
-            {classes.map(
-              (classItem: {
-                id: number;
-                name: string;
-                capacity: number;
-                _count: { students: number };
-              }) => (
-                <option value={classItem.id} key={classItem.id}>
-                  ({classItem.name} -{" "}
-                  {classItem._count.students + "/" + classItem.capacity}{" "}
-                  Capacity)
-                </option>
-              )
-            )}
-          </select>
-          {errors.classId?.message && (
-            <p className="text-xs text-red-400">
-              {errors.classId.message.toString()}
-            </p>
-          )}
-        </div>
-      </div>
-      {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
-      )}
-      <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
-      </button>
-    </form>
-  );
-};
-
-export default StudentForm;
+        </CardContent>
+        <CardFooter>
+          {state.error && <p className="text-sm text-red-500">Something went wrong!</p>}
+          <Button type="submit" className="ml-auto">
+            {type === "create" ? "Create" : "Update"}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  )
+}

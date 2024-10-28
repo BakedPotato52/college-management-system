@@ -79,7 +79,7 @@ export default function SubjectForm({ type, data, setOpen, relatedData }: Subjec
           </div>
           <div className="space-y-2">
             <Label htmlFor="teachers">Teachers</Label>
-            <Select {...register("teachers")} multiple>
+            <Select {...register("teachers")}>
               <SelectTrigger>
                 <SelectValue placeholder="Select teachers" />
               </SelectTrigger>

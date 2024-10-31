@@ -1,13 +1,15 @@
+import { auth } from "@clerk/nextjs/server";
+import { Filter, SortAsc } from "lucide-react";
+import type { Prisma } from "@prisma/client";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import FormContainer from "@/components/FormContainer";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Prisma } from "@prisma/client";
-import Image from "next/image";
-
-import { auth } from "@clerk/nextjs/server";
 
 type ResultList = {
   id: number;
@@ -21,90 +23,48 @@ type ResultList = {
   startTime: Date;
 };
 
-
-const ResultListPage = async ({
+export default async function ResultListPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | undefined };
-}) => {
-
+}) {
   const { userId, sessionClaims } = auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   const currentUserId = userId;
 
-
   const columns = [
-    {
-      header: "Title",
-      accessor: "title",
-    },
-    {
-      header: "Student",
-      accessor: "student",
-    },
-    {
-      header: "Score",
-      accessor: "score",
-      className: "hidden md:table-cell",
-    },
-    {
-      header: "Teacher",
-      accessor: "teacher",
-      className: "hidden md:table-cell",
-    },
-    {
-      header: "Class",
-      accessor: "class",
-      className: "hidden md:table-cell",
-    },
-    {
-      header: "Date",
-      accessor: "date",
-      className: "hidden md:table-cell",
-    },
-    ...(role === "admin" || role === "teacher"
-      ? [
-        {
-          header: "Actions",
-          accessor: "action",
-        },
-      ]
-      : []),
+    { header: "Title", accessor: "title" },
+    { header: "Student", accessor: "student" },
+    { header: "Score", accessor: "score", className: "hidden md:table-cell" },
+    { header: "Teacher", accessor: "teacher", className: "hidden md:table-cell" },
+    { header: "Class", accessor: "class", className: "hidden md:table-cell" },
+    { header: "Date", accessor: "date", className: "hidden md:table-cell" },
+    ...(role === "admin" || role === "teacher" ? [{ header: "Actions", accessor: "action" }] : []),
   ];
 
   const renderRow = (item: ResultList) => (
-    <tr
-      key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
-    >
-      <td className="flex items-center gap-4 p-4">{item.title}</td>
-      <td>{item.studentName + " " + item.studentSurname}</td>
-      <td className="hidden md:table-cell">{item.score}</td>
-      <td className="hidden md:table-cell">
-        {item.teacherName + " " + item.teacherSurname}
-      </td>
-      <td className="hidden md:table-cell">{item.className}</td>
-      <td className="hidden md:table-cell">
+    <tr key={item.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+      <td className="p-4 align-middle">{item.title}</td>
+      <td className="p-4 align-middle">{`${item.studentName} ${item.studentSurname}`}</td>
+      <td className="hidden md:table-cell p-4 align-middle">{item.score}</td>
+      <td className="hidden md:table-cell p-4 align-middle">{`${item.teacherName} ${item.teacherSurname}`}</td>
+      <td className="hidden md:table-cell p-4 align-middle">{item.className}</td>
+      <td className="hidden md:table-cell p-4 align-middle">
         {new Intl.DateTimeFormat("en-US").format(item.startTime)}
       </td>
-      <td>
-        <div className="flex items-center gap-2">
-          {(role === "admin" || role === "teacher") && (
-            <>
-              <FormContainer table="result" type="update" data={item} />
-              <FormContainer table="result" type="delete" id={item.id} />
-            </>
-          )}
-        </div>
-      </td>
+      {(role === "admin" || role === "teacher") && (
+        <td className="p-4 align-middle">
+          <div className="flex items-center gap-2">
+            <FormContainer table="result" type="update" data={item} />
+            <FormContainer table="result" type="delete" id={item.id} />
+          </div>
+        </td>
+      )}
     </tr>
   );
 
   const { page, ...queryParams } = searchParams;
-
   const p = page ? parseInt(page) : 1;
-
-  // URL PARAMS CONDITION
 
   const query: Prisma.ResultWhereInput = {};
 
@@ -128,8 +88,6 @@ const ResultListPage = async ({
     }
   }
 
-  // ROLE CONDITIONS
-
   switch (role) {
     case "admin":
       break;
@@ -139,15 +97,11 @@ const ResultListPage = async ({
         { assignment: { lesson: { teacherId: currentUserId! } } },
       ];
       break;
-
     case "student":
       query.studentId = currentUserId!;
       break;
-
     case "parent":
-      query.student = {
-        parentId: currentUserId!,
-      };
+      query.student = { parentId: currentUserId! };
       break;
     default:
       break;
@@ -187,11 +141,8 @@ const ResultListPage = async ({
 
   const data = dataRes.map((item) => {
     const assessment = item.exam || item.assignment;
-
     if (!assessment) return null;
-
     const isExam = "startTime" in assessment;
-
     return {
       id: item.id,
       title: assessment.title,
@@ -206,31 +157,32 @@ const ResultListPage = async ({
   });
 
   return (
-    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      {/* TOP */}
-      <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Results</h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+    <Card className="mx-4 mt-0">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-bold">Results</CardTitle>
+        <div className="flex items-center space-x-2">
           <TableSearch />
-          <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
-            {(role === "admin" || role === "teacher") && (
-              <FormContainer table="result" type="create" />
-            )}
-          </div>
+          <Button variant="outline" size="icon">
+            <Filter className="h-4 w-4" />
+            <span className="sr-only">Filter</span>
+          </Button>
+          <Button variant="outline" size="icon">
+            <SortAsc className="h-4 w-4" />
+            <span className="sr-only">Sort</span>
+          </Button>
+          {(role === "admin" || role === "teacher") && (
+            <FormContainer table="result" type="create" />
+          )}
         </div>
-      </div>
-      {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
-      {/* PAGINATION */}
-      <Pagination page={p} count={count} />
-    </div>
+      </CardHeader>
+      <CardContent>
+        <div className="rounded-md pb-4 pl-4 border">
+          <Table columns={columns} renderRow={renderRow} data={data} />
+        </div>
+        <div className="mt-4 flex justify-center">
+          <Pagination page={p} count={count} />
+        </div>
+      </CardContent>
+    </Card>
   );
-};
-
-export default ResultListPage;
+}

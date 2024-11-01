@@ -45,7 +45,7 @@ export default function Menu({ role }: MenuProps) {
           className="flex items-center justify-center lg:justify-start gap-2 mb-8"
           aria-label="ICFAI University Home"
         >
-          <Image src="/logo.png" alt="" width={32} height={32} />
+          <Image src="/logo.png" className="w-auto h-auto" alt="" width={32} height={32} />
           <span className="hidden lg:block font-bold text-primary">ICFAI University</span>
         </Link>
         {menuItems.map((section) => (
@@ -59,16 +59,18 @@ export default function Menu({ role }: MenuProps) {
                 .map((item) => {
                   const IconComponent = item.icon as LucideIcon
                   return (
-                    <li key={item.label}>
-                      <Link
-                        href={item.href}
-                        className="flex items-center justify-start gap-4 text-gray-500 py-2 px-3 rounded-md hover:bg-lamaSkyLight transition-colors duration-200"
-                        aria-label={item.label}
-                      >
-                        <IconComponent className="w-5 h-5" aria-hidden="true" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
+                    <div className="flex items-center justify-start gap-4 text-gray-500 py-2 px-3 rounded-md w-full  transition-colors duration-300 ease-in-out hover:text-black dark:hover:text-white  hover:animate-out">
+                      <li key={item.label}>
+                        <Link
+                          href={item.href}
+                          className="flex items-center justify-start gap-4 "
+                          aria-label={item.label}
+                        >
+                          <IconComponent className="w-5 h-5" aria-hidden="true" />
+                          <span>{item.label}</span>
+                        </Link>
+                      </li>
+                    </div>
                   )
                 })}
             </ul>
@@ -83,9 +85,11 @@ export default function Menu({ role }: MenuProps) {
           <li>
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="More options" className="w-full h-full">
-                  <MoreHorizontal />
-                  <span className="text-xs mt-1">More</span>
+                <Button variant="ghost" size="icon" aria-label="More options" className="w-full flex h-full">
+                  <div className="flex flex-col items-center justify-center gap-1 p-2 text-gray-500 hover:bg-sky-300 transition-colors duration-200 rounded-md">
+                    <MoreHorizontal />
+                    <span className="text-xs mt-1">More</span>
+                  </div>
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[80vh]">

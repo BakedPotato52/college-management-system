@@ -3,7 +3,7 @@ import Menu from "./Menu";
 
 export default async function MenuWrapper() {
     const user = await currentUser();
-    const role = user?.publicMetadata.role as "admin" | "teacher" | "student" | "parent";
+    const role = user?.publicMetadata.role as "admin" | "teacher" | "student";
 
     return <Menu role={role} />;
 }

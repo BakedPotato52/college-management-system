@@ -25,7 +25,7 @@ const Announcements = async () => {
   });
 
   return (
-    <div className="bg-card dark:bg-card p-4 rounded-md">
+    <div className="bg-card dark:bg-card p-4 rounded-md dark:text-white">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Announcements</h1>
         <span className="text-xs text-gray-400">View All</span>

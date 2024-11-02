@@ -43,13 +43,13 @@ const menuItems: MenuSection[] = [
             {
                 icon: Users,
                 label: "Teachers",
-                href: "/teacherslist",
+                href: "/list/teachers",
                 visible: ["admin", "teacher"],
             },
             {
                 icon: GraduationCap,
                 label: "Students",
-                href: "/studentslist",
+                href: "/list/students",
                 visible: ["admin", "teacher"],
             },
             {

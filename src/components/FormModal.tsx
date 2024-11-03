@@ -111,10 +111,10 @@ const FormModal = ({
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =
     type === "create"
-      ? "bg-lamaYellow"
+      ? "bg-yellow-300"
       : type === "update"
-        ? "bg-lamaSky"
-        : "bg-lamaPurple";
+        ? "bg-sky-400"
+        : "bg-purple-300";
 
   const [open, setOpen] = useState(false);
 
@@ -134,8 +134,10 @@ const FormModal = ({
       }
     }, [state, router]);
 
+    console.log("Table value:", table); // Debugging log
+
     return type === "delete" && id ? (
-      <form action={formAction} className="p-4 flex flex-col gap-4">
+      <form action={formAction} className="p-4 flex dark:bg-popover flex-col gap-4">
         <input type="text | number" name="id" value={id} hidden />
         <span className="text-center font-medium">
           All data will be lost. Are you sure you want to delete this {table}?
@@ -145,7 +147,11 @@ const FormModal = ({
         </button>
       </form>
     ) : type === "create" || type === "update" ? (
-      forms[table](setOpen, type, data, relatedData)
+      forms[table] ? (
+        forms[table](setOpen, type, data, relatedData)
+      ) : (
+        <div>Form not found for {table}</div>
+      )
     ) : (
       "Form not found!"
     );

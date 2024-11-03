@@ -14,13 +14,15 @@ type Student = {
     address: string
     img?: string
     createdAt: Date
-    updatedAt: Date
+    updatedAt?: Date
     birthday: Date
     grade: {
         id: number
         level: number
     }
 }
+
+
 
 export default function StudentList({ students }: { students: Student[] }) {
     return (
@@ -43,7 +45,7 @@ export default function StudentList({ students }: { students: Student[] }) {
                                     <div className="text-sm text-muted-foreground">Grade: {student.grade.level}</div>
                                 </div>
                             </HoverCardTrigger>
-                            <HoverCardContent className="w-80">
+                            <HoverCardContent className="aspect-auto bg-transparent">
                                 <div className="space-y-2">
                                     <h4 className="text-sm font-semibold">{student.name} {student.surname}</h4>
                                     <p className="text-sm">Username: {student.username}</p>

@@ -18,9 +18,9 @@ export default function DashboardLayout({
       </Suspense>
 
       {/* Main Content */}
-      <main className="w-full max-sm:w-full lg:w-[84%] xl:w-[86%] bg-background overflow-scroll flex flex-col">
+      <main className="w-full max-sm:w-full bg-background overflow-scroll-y flex flex-col">
         <Navbar />
-        <div className="flex-1 overflow-auto p-4 sm:p-6">
+        <div className="flex-1 p-4 sm:p-6">
           {children}
         </div>
       </main>

@@ -1,144 +1,180 @@
-import FormContainer from "@/components/FormContainer";
-import Pagination from "@/components/Pagination";
-import Table from "@/components/Table";
-import TableSearch from "@/components/TableSearch";
-import prisma from "@/lib/prisma";
-import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
-import Image from "next/image";
-import { auth } from "@clerk/nextjs/server";
-
-type LessonList = Lesson & { subject: Subject } & { class: Class } & {
-  teacher: Teacher;
-};
+'use client'
+function formatDate(date: Date): string {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 
 
-const LessonListPage = async ({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | undefined };
-}) => {
+import { useState } from 'react'
+import { Card } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-  const { sessionClaims } = auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
+interface TimeSlot {
+  courseCode: string
+  teacher: string
+  room?: string
+}
 
+interface DaySchedule {
+  [key: number]: TimeSlot | null
+}
 
-  const columns = [
-    {
-      header: "Subject Name",
-      accessor: "name",
-    },
-    {
-      header: "Class",
-      accessor: "class",
-    },
-    {
-      header: "Teacher",
-      accessor: "teacher",
-      className: "hidden md:table-cell",
-    },
-    ...(role === "admin"
-      ? [
-        {
-          header: "Actions",
-          accessor: "action",
-        },
-      ]
-      : []),
-  ];
-
-  const renderRow = (item: LessonList) => (
-    <tr
-      key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
-    >
-      <td className="flex items-center gap-4 p-4">{item.subject.name}</td>
-      <td>{item.class.name}</td>
-      <td className="hidden md:table-cell">
-        {item.teacher.name + " " + item.teacher.surname}
-      </td>
-      <td>
-        <div className="flex items-center gap-2">
-          {role === "admin" && (
-            <>
-              <FormContainer table="lesson" type="update" data={item} />
-              <FormContainer table="lesson" type="delete" id={item.id} />
-            </>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
-
-  const { page, ...queryParams } = searchParams;
-
-  const p = page ? parseInt(page) : 1;
-
-  // URL PARAMS CONDITION
-
-  const query: Prisma.LessonWhereInput = {};
-
-  if (queryParams) {
-    for (const [key, value] of Object.entries(queryParams)) {
-      if (value !== undefined) {
-        switch (key) {
-          case "classId":
-            query.classId = parseInt(value);
-            break;
-          case "teacherId":
-            query.teacherId = value;
-            break;
-          case "search":
-            query.OR = [
-              { subject: { name: { contains: value, mode: "insensitive" } } },
-              { teacher: { name: { contains: value, mode: "insensitive" } } },
-            ];
-            break;
-          default:
-            break;
-        }
-      }
-    }
+interface TimetableProps {
+  schedule: {
+    [key: string]: DaySchedule
   }
+}
 
-  const [data, count] = await prisma.$transaction([
-    prisma.lesson.findMany({
-      where: query,
-      include: {
-        subject: { select: { name: true } },
-        class: { select: { name: true } },
-        teacher: { select: { name: true, surname: true } },
-      },
-      take: ITEM_PER_PAGE,
-      skip: ITEM_PER_PAGE * (p - 1),
-    }),
-    prisma.lesson.count({ where: query }),
-  ]);
+export default function Component({ schedule = defaultSchedule }: TimetableProps) {
+  const [selectedDay, setSelectedDay] = useState("Mo")
+
+  const periods = [
+    { id: 1, time: "9:00 - 10:00 AM" },
+    { id: 2, time: "10:10 - 11:00 AM" },
+    { id: 3, time: "11:10 - 11:55 AM" },
+    { id: 4, time: "12:00 - 12:50 PM" },
+    { id: 5, time: "12:55 - 1:45 PM" },
+    { id: 6, time: "1:50 - 2:40 PM" },
+    { id: 7, time: "3:30 - 4:00 PM" },
+    { id: 8, time: "4:30 - 4:30 PM" },
+  ]
+
+  const days = [
+    { id: "Monday", name: "Monday" },
+    { id: "Tuesday", name: "Tuesday" },
+    { id: "Wednesday", name: "Wednesday" },
+    { id: "Thursday", name: "Thursday" },
+    { id: "Friday", name: "Friday" },
+  ]
 
   return (
-    <div className="dark:bg-black dark:text-white p-4 rounded-md flex-1 m-4 mt-0">
-      {/* TOP */}
-      <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Lessons</h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
-          <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
-            {role === "admin" && <FormContainer table="lesson" type="create" />}
+    <Card className="p-4">
+      <div className="space-y-4">
+        <img src="/logo.png" alt="ICFAI Univesity" className='w-10 h-10 bg-transparent' />
+        <h2 className="text-2xl font-bold text-center">Lateral CSE 3rd Year Sem 1</h2>
+        <h3 className="text-sm text-muted-foreground text-center">ICFAI UNIVERSITY TRIPURA, Kamalghat, Mohanpur, Agartala</h3>
+
+        {/* Mobile View */}
+        <div className="md:hidden">
+          <Select onValueChange={setSelectedDay} defaultValue={selectedDay}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a day" />
+            </SelectTrigger>
+            <SelectContent>
+              {days.map((day) => (
+                <SelectItem key={day.id} value={day.id}>
+                  {day.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="mt-4 space-y-4">
+            {periods.map((period) => {
+              const slot = schedule[selectedDay]?.[period.id]
+              return (
+                <div key={period.id} className="border rounded-md p-3">
+                  <div className="font-medium">Period {period.id}</div>
+                  <div className="text-sm text-muted-foreground">{period.time}</div>
+                  {slot ? (
+                    <div className="mt-2">
+                      <div className="font-medium">{slot.courseCode}</div>
+                      <div className="text-sm">{slot.teacher}</div>
+                      {slot.room && <div className="text-sm text-muted-foreground">{slot.room}</div>}
+                    </div>
+                  ) : (
+                    <div className="mt-2 text-sm text-muted-foreground">No class</div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
-      </div>
-      {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
-      {/* PAGINATION */}
-      <Pagination page={p} count={count} />
-    </div>
-  );
-};
 
-export default LessonListPage;
+        {/* Desktop View */}
+        <div className="hidden md:block overflow-x-auto">
+          <div className="min-w-[1000px]">
+            <div className="grid grid-cols-[100px_repeat(8,1fr)] gap-2">
+              {/* Period Headers */}
+              <div className="h-16" />
+              {periods.map((period) => (
+                <div key={period.id} className="text-center p-2 bg-primary/5 rounded-md">
+                  <div className="font-medium text-sm">PERIOD {period.id}</div>
+                  <div className="text-xs text-muted-foreground">{period.time}</div>
+                </div>
+              ))}
+
+              {/* Days and Slots */}
+              {days.map((day) => (
+                <>
+                  <div key={`day-${day.id}`} className="flex items-center font-medium text-primary">
+                    {day.id}
+                  </div>
+                  {periods.map((period) => {
+                    const slot = schedule[day.id]?.[period.id]
+                    return (
+                      <div
+                        key={`${day.id}-${period.id}`}
+                        className="p-2 border rounded-md min-h-[80px] text-center group hover:bg-accent transition-colors"
+                      >
+                        {slot?.room && (
+                          <div className="text-xs text-muted-foreground mb-1">{slot.room}</div>
+                        )}
+                        {slot?.courseCode && (
+                          <>
+                            <div className="font-medium text-sm">{slot.courseCode}</div>
+                            <div className="text-xs text-muted-foreground mt-1">{slot.teacher}</div>
+                          </>
+                        )}
+                      </div>
+                    )
+                  })}
+                </>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="text-xs text-muted-foreground text-right mt-4">
+          Timetable generated on {formatDate(new Date())}
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+// Default schedule data based on the image
+const defaultSchedule = {
+  "Monday": {
+    1: { courseCode: "CSE325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
+    3: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
+    7: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
+    8: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
+  },
+  "Tuesday": {
+    1: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
+    3: { courseCode: "CS325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
+    4: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
+    7: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
+    8: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
+  },
+  "Wednesday": {
+    1: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
+    3: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
+    4: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
+    7: { courseCode: "CS325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
+  },
+  "Thursday": {
+    1: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
+    2: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
+    3: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
+    5: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
+  },
+  "Friday": {
+    1: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
+    3: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
+    7: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
+    8: { courseCode: "CRT303", teacher: "JOYDEEP DAS", room: "ACC307" },
+  }
+}

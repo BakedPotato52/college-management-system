@@ -25,6 +25,7 @@ model Student {
   bloodType   String
   sex         UserSex
   createdAt   DateTime     @default(now())
+  updateAt    DateTime     @default(now())
   parentId    String
   parent      Parent       @relation(fields: [parentId], references: [id])
   classId     Int

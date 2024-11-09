@@ -10,19 +10,19 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
 
     useEffect(() => {
         const fetchUser = async () => {
-            const response = await fetch(`/api/users/${params.id}`)
+            const response = await fetch(`/api/users/admin`)
             const data = await response.json()
             setUser(data)
         }
         fetchUser()
-    }, [params.id])
+    }, [])
 
     const handleEdit = () => {
         setIsEditing(true)
     }
 
     const handleSave = async (updatedData: any) => {
-        const response = await fetch(`/api/users/${params.id}`, {
+        const response = await fetch(`/api/users/admin`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

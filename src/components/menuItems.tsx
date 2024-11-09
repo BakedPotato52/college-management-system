@@ -120,7 +120,7 @@ const menuItems: MenuSection[] = [
             {
                 icon: UserCircle,
                 label: "Profile",
-                href: "/profile/[id]",
+                href: "/profile",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {

@@ -9,7 +9,11 @@ async function getStudents() {
       grade: true,
     },
   })
-  return students
+  return students.map(student => ({
+    ...student,
+    updatedAt: student.updateAt || new Date(), // Provide a default value if updatedAt is null
+    img: student.img || undefined, // Convert null to undefined for img
+  }))
 }
 
 export default async function StudentsPage() {

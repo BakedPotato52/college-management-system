@@ -12,9 +12,10 @@ type Student = {
     email: string | null
     phone: string | null
     address: string
+    bloodType: string
     img?: string
     createdAt: Date
-    updatedAt?: Date
+    updatedAt: Date
     birthday: Date
     grade: {
         id: number
@@ -22,11 +23,9 @@ type Student = {
     }
 }
 
-
-
 export default function StudentList({ students }: { students: Student[] }) {
     return (
-        <div className="container mx-auto dark:text-white p-4">
+        <div className="container mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">Student List</h1>
             <ul className="space-y-2">
                 {students.map((student) => (
@@ -35,7 +34,7 @@ export default function StudentList({ students }: { students: Student[] }) {
                             <HoverCardTrigger asChild>
                                 <div className="flex items-center space-x-4 cursor-pointer">
                                     <Avatar>
-                                        <AvatarImage src={student.img} alt={student.name} />
+                                        <AvatarImage src={student.img} alt={`${student.name} ${student.surname}`} />
                                         <AvatarFallback><User className="h-6 w-6" /></AvatarFallback>
                                     </Avatar>
                                     <div className="flex-grow">
@@ -45,15 +44,16 @@ export default function StudentList({ students }: { students: Student[] }) {
                                     <div className="text-sm text-muted-foreground">Grade: {student.grade.level}</div>
                                 </div>
                             </HoverCardTrigger>
-                            <HoverCardContent className="aspect-auto bg-transparent">
+                            <HoverCardContent className="w-80">
                                 <div className="space-y-2">
                                     <h4 className="text-sm font-semibold">{student.name} {student.surname}</h4>
                                     <p className="text-sm">Username: {student.username}</p>
                                     <p className="text-sm">Email: {student.email || 'Not provided'}</p>
                                     <p className="text-sm">Phone: {student.phone || 'Not provided'}</p>
                                     <p className="text-sm">Address: {student.address}</p>
-                                    <p className="text-sm">Birthday: {student.birthday.toLocaleDateString()}</p>
+                                    <p className="text-sm">Birthday: {new Date(student.birthday).toLocaleDateString()}</p>
                                     <p className="text-sm">Grade Level: {student.grade.level}</p>
+                                    <p className='text-sm'>Blood Type: {student.bloodType}</p>
                                 </div>
                             </HoverCardContent>
                         </HoverCard>

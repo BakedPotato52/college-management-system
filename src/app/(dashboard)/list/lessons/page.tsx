@@ -1,13 +1,6 @@
 'use client'
-function formatDate(date: Date): string {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
 
-
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -21,38 +14,81 @@ interface DaySchedule {
   [key: number]: TimeSlot | null
 }
 
-interface TimetableProps {
-  schedule: {
-    [key: string]: DaySchedule
+interface Schedule {
+  [key: string]: DaySchedule
+}
+
+// Remove the TimetableProps interface
+
+function formatDate(date: Date): string {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+const periods = [
+  { id: 1, time: "9:00 - 10:00 AM" },
+  { id: 2, time: "10:10 - 11:00 AM" },
+  { id: 3, time: "11:10 - 11:55 AM" },
+  { id: 4, time: "12:00 - 12:50 PM" },
+  { id: 5, time: "12:55 - 1:45 PM" },
+  { id: 6, time: "1:50 - 2:40 PM" },
+  { id: 7, time: "3:30 - 4:00 PM" },
+  { id: 8, time: "4:30 - 4:30 PM" },
+]
+
+const days = [
+  { id: "Monday", name: "Monday" },
+  { id: "Tuesday", name: "Tuesday" },
+  { id: "Wednesday", name: "Wednesday" },
+  { id: "Thursday", name: "Thursday" },
+  { id: "Friday", name: "Friday" },
+]
+
+// Default schedule data based on the image
+const defaultSchedule: Schedule = {
+  "Monday": {
+    1: { courseCode: "CSE325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
+    3: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
+    7: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
+    8: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
+  },
+  "Tuesday": {
+    1: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
+    3: { courseCode: "CS325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
+    4: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
+    7: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
+    8: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
+  },
+  "Wednesday": {
+    1: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
+    3: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
+    4: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
+    7: { courseCode: "CS325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
+  },
+  "Thursday": {
+    1: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
+    2: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
+    3: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
+    5: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
+  },
+  "Friday": {
+    1: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
+    3: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
+    7: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
+    8: { courseCode: "CRT303", teacher: "JOYDEEP DAS", room: "ACC307" },
   }
 }
 
-export default function Component({ schedule = defaultSchedule }: TimetableProps) {
-  const [selectedDay, setSelectedDay] = useState("Mo")
-
-  const periods = [
-    { id: 1, time: "9:00 - 10:00 AM" },
-    { id: 2, time: "10:10 - 11:00 AM" },
-    { id: 3, time: "11:10 - 11:55 AM" },
-    { id: 4, time: "12:00 - 12:50 PM" },
-    { id: 5, time: "12:55 - 1:45 PM" },
-    { id: 6, time: "1:50 - 2:40 PM" },
-    { id: 7, time: "3:30 - 4:00 PM" },
-    { id: 8, time: "4:30 - 4:30 PM" },
-  ]
-
-  const days = [
-    { id: "Monday", name: "Monday" },
-    { id: "Tuesday", name: "Tuesday" },
-    { id: "Wednesday", name: "Wednesday" },
-    { id: "Thursday", name: "Thursday" },
-    { id: "Friday", name: "Friday" },
-  ]
+export default function Timetable() {
+  const [selectedDay, setSelectedDay] = useState("Monday")
+  const [schedule, setSchedule] = useState<Schedule>(defaultSchedule)
 
   return (
     <Card className="p-4">
       <div className="space-y-4">
-        <img src="/logo.png" alt="ICFAI Univesity" className='w-10 h-10 bg-transparent' />
+        <img src="/placeholder.svg?height=40&width=40" alt="ICFAI University" className="w-10 h-10 bg-transparent" />
         <h2 className="text-2xl font-bold text-center">Lateral CSE 3rd Year Sem 1</h2>
         <h3 className="text-sm text-muted-foreground text-center">ICFAI UNIVERSITY TRIPURA, Kamalghat, Mohanpur, Agartala</h3>
 
@@ -107,9 +143,9 @@ export default function Component({ schedule = defaultSchedule }: TimetableProps
 
               {/* Days and Slots */}
               {days.map((day) => (
-                <>
-                  <div key={`day-${day.id}`} className="flex items-center font-medium text-primary">
-                    {day.id}
+                <React.Fragment key={`day-${day.id}`}>
+                  <div className="flex items-center font-medium text-primary">
+                    {day.name}
                   </div>
                   {periods.map((period) => {
                     const slot = schedule[day.id]?.[period.id]
@@ -130,7 +166,7 @@ export default function Component({ schedule = defaultSchedule }: TimetableProps
                       </div>
                     )
                   })}
-                </>
+                </React.Fragment>
               ))}
             </div>
           </div>
@@ -142,39 +178,4 @@ export default function Component({ schedule = defaultSchedule }: TimetableProps
       </div>
     </Card>
   )
-}
-
-// Default schedule data based on the image
-const defaultSchedule = {
-  "Monday": {
-    1: { courseCode: "CSE325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
-    3: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
-    7: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
-    8: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
-  },
-  "Tuesday": {
-    1: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
-    3: { courseCode: "CS325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
-    4: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
-    7: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
-    8: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
-  },
-  "Wednesday": {
-    1: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
-    3: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
-    4: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
-    7: { courseCode: "CS325", teacher: "ARUNANGSHU PAL", room: "ACC307" },
-  },
-  "Thursday": {
-    1: { courseCode: "CSE302", teacher: "SUKANYA SAHA", room: "ACC307" },
-    2: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
-    3: { courseCode: "CS408", teacher: "Dipanwita Das", room: "ACC307" },
-    5: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
-  },
-  "Friday": {
-    1: { courseCode: "CSE307", teacher: "RAKTIM DEB", room: "ACC307" },
-    3: { courseCode: "CSE303", teacher: "DIPANJOY MAJUMDER", room: "ACC307" },
-    7: { courseCode: "CSE301", teacher: "JOYIAL SARKAR", room: "ACC307" },
-    8: { courseCode: "CRT303", teacher: "JOYDEEP DAS", room: "ACC307" },
-  }
 }

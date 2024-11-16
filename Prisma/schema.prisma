@@ -49,6 +49,7 @@ model Teacher {
   bloodType String
   sex       UserSex
   createdAt DateTime  @default(now())
+  updateAt  DateTime  @default(now())
   subjects  Subject[]
   lessons   Lesson[]
   classes   Class[]

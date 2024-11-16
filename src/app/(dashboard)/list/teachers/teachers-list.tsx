@@ -1,10 +1,12 @@
 'use client'
 
-import { User } from 'lucide-react'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState } from 'react'
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { UserSex } from '@prisma/client'
 
-type Teacher = {
+interface Teacher {
     id: string
     username: string
     name: string
@@ -12,59 +14,93 @@ type Teacher = {
     email: string | null
     phone: string | null
     address: string
-    bloodType: string
     img?: string
+    bloodType: string
+    sex: UserSex
     createdAt: Date
-    updatedAt: Date
+    updateAt: Date
     birthday: Date
-    subject: {
-        id: number,
-        name: string
-    }
-    lesson: {
-        id: number,
-        name: string,
-        startTime: Date,
-        endTime: Date
-    }
-
+    subjects: { id: number; name: string }[]
+    classes: { id: number; name: string }[]
 }
 
-export default function teacherList({ teachers }: { teachers: Teacher[] }) {
+interface TeachersListProps {
+    teachers: Teacher[]
+}
+
+export default function TeachersList({ teachers }: TeachersListProps) {
+    const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>(teachers)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [searchTerm, setSearchTerm] = useState('')
+    const teachersPerPage = 10
+
+    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const term = event.target.value.toLowerCase()
+        setSearchTerm(term)
+        const results = teachers.filter(teacher =>
+            teacher.name.toLowerCase().includes(term) ||
+            teacher.surname.toLowerCase().includes(term)
+        )
+        setFilteredTeachers(results)
+        setCurrentPage(1)
+    }
+
+    const indexOfLastTeacher = currentPage * teachersPerPage
+    const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage
+    const currentTeachers = filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher)
+
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+
     return (
         <div className="container mx-auto p-4 dark:text-white">
-            <h1 className="text-2xl font-bold mb-4">teacher List</h1>
-            <ul className="space-y-2">
-                {teachers.map((teacher) => (
-                    <li key={teacher.id} className="bg-card text-card-foreground rounded-lg p-4 shadow-sm transition-all duration-300 ease-in-out hover:bg-accent hover:shadow-md hover:scale-[1.02] focus-within:bg-accent focus-within:shadow-md focus-within:scale-[1.02]">
-                        <HoverCard>
-                            <HoverCardTrigger asChild>
-                                <div className="flex items-center space-x-4 cursor-pointer">
-                                    <Avatar>
-                                        <AvatarImage src={teacher.img} alt={`${teacher.name} ${teacher.surname}`} />
-                                        <AvatarFallback><User className="h-6 w-6" /></AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-grow">
-                                        <p className="font-medium">{teacher.name} {teacher.surname}</p>
-                                        <p className="text-sm text-muted-foreground">{teacher.email || 'No email provided'}</p>
-                                    </div>
-                                </div>
-                            </HoverCardTrigger>
-                            <HoverCardContent className="w-80">
-                                <div className="space-y-2">
-                                    <h4 className="text-sm font-semibold">{teacher.name} {teacher.surname}</h4>
-                                    <p className="text-sm">Username: {teacher.username}</p>
-                                    <p className="text-sm">Email: {teacher.email || 'Not provided'}</p>
-                                    <p className="text-sm">Phone: {teacher.phone || 'Not provided'}</p>
-                                    <p className="text-sm">Address: {teacher.address}</p>
-                                    <p className="text-sm">Birthday: {new Date(teacher.birthday).toLocaleDateString()}</p>
-                                    <p className='text-sm'>Blood Type: {teacher.bloodType}</p>
-                                </div>
-                            </HoverCardContent>
-                        </HoverCard>
-                    </li>
+            <h1 className="text-2xl font-bold mb-4">Teachers List</h1>
+            <Input
+                type="text"
+                placeholder="Search by name or surname"
+                value={searchTerm}
+                onChange={handleSearch}
+                className="mb-4"
+            />
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Address</TableHead>
+                        <TableHead>Blood Type</TableHead>
+                        <TableHead>Sex</TableHead>
+                        <TableHead>Subjects</TableHead>
+                        <TableHead>Classes</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {currentTeachers.map((teacher) => (
+                        <TableRow key={teacher.id}>
+                            <TableCell>{teacher.name} {teacher.surname}</TableCell>
+                            <TableCell>{teacher.email || 'N/A'}</TableCell>
+                            <TableCell>{teacher.phone || 'N/A'}</TableCell>
+                            <TableCell>{teacher.address}</TableCell>
+                            <TableCell>{teacher.bloodType}</TableCell>
+                            <TableCell>{teacher.sex}</TableCell>
+                            <TableCell>{teacher.subjects.map(subject => subject.name).join(', ')}</TableCell>
+                            <TableCell>{teacher.classes.map(class_ => class_.name).join(', ')}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+            <div className="mt-4 flex justify-center">
+                {Array.from({ length: Math.ceil(filteredTeachers.length / teachersPerPage) }, (_, i) => (
+                    <Button
+                        key={i}
+                        onClick={() => paginate(i + 1)}
+                        variant={currentPage === i + 1 ? "default" : "outline"}
+                        className="mx-1"
+                    >
+                        {i + 1}
+                    </Button>
                 ))}
-            </ul>
+            </div>
         </div>
     )
 }

@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 async function getTeachers() {
   const teachers = await prisma.teacher.findMany({
-
+    include: { subjects: true, lessons: true, }
   })
   return teachers.map(teacher => ({
     ...teacher,

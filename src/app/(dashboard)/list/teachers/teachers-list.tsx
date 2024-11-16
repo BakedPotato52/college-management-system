@@ -17,12 +17,22 @@ type Teacher = {
     createdAt: Date
     updatedAt: Date
     birthday: Date
+    subject: {
+        id: number,
+        name: string
+    }
+    lesson: {
+        id: number,
+        name: string,
+        startTime: Date,
+        endTime: Date
+    }
 
 }
 
 export default function teacherList({ teachers }: { teachers: Teacher[] }) {
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 dark:text-white">
             <h1 className="text-2xl font-bold mb-4">teacher List</h1>
             <ul className="space-y-2">
                 {teachers.map((teacher) => (

@@ -88,7 +88,7 @@ export default function Timetable() {
   return (
     <Card className="p-4">
       <div className="space-y-4">
-        <img src="/placeholder.svg?height=40&width=40" alt="ICFAI University" className="w-10 h-10 bg-transparent" />
+        <img src="/logo.png?height=60&width=60" alt="ICFAI University" className="w-10 h-10 bg-transparent" />
         <h2 className="text-2xl font-bold text-center">Lateral CSE 3rd Year Sem 1</h2>
         <h3 className="text-sm text-muted-foreground text-center">ICFAI UNIVERSITY TRIPURA, Kamalghat, Mohanpur, Agartala</h3>
 
